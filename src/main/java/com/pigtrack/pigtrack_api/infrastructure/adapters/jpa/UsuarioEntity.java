@@ -1,5 +1,6 @@
 package com.pigtrack.pigtrack_api.infrastructure.adapters.jpa;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -12,11 +13,17 @@ public class UsuarioEntity {
 
     @Id
     private UUID id;
+    @Column(name = "nombre")
     private String nombre;
+    @Column(name = "apellido")
     private String apellido;
+    @Column(name = "email")
     private String email;
+    @Column(name = "telefono")
     private String telefono;
+    @Column(name = "contraseña")
     private String contraseña;
+    @Column(name = "rol")
     private String rol;
 
     public UsuarioEntity() {}

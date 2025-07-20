@@ -10,15 +10,15 @@ public class CerdoEntity {
 
     @Id
     private UUID id;
-
+    @Column(name = "nombre")
     private String nombre;
-
+    @Column(name = "raza")
     private String raza;
-
+    @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
-
+    @Column(name = "peso")
     private double peso;
-
+    @Column(name = "usuarioId")
     private UUID usuarioId;
 
     // --- Constructor vacío requerido por JPA ---
