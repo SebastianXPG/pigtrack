@@ -8,15 +8,17 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity; // Importar WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy; // Importar SessionCreationPolicy
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer; // Importar WebSecurityCustomizer
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer; // Importar para csrf.disable()
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomUserDetailsService userDetailsService; // Inyectado para el AuthenticationProvider
+    private final CustomUserDetailsService userDetailsService;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, CustomUserDetailsService userDetailsService) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -52,9 +54,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // Configuración de las reglas de autorización HTTP
                 .authorizeHttpRequests(auth -> auth
-                        // Permite el acceso sin autenticación a la ruta de registro de usuarios
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         // Permite el acceso sin autenticación a las rutas de autenticación (login, etc.)
+                        // La ruta /api/usuarios (POST) se excluye completamente con webSecurityCustomizer()
                         .requestMatchers("/api/auth/**").permitAll()
                         // Aquí puedes añadir otras rutas que no requieran autenticación, por ejemplo, Swagger UI
                         // .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
@@ -69,6 +70,13 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    // Bean para excluir rutas específicas de la cadena de filtros de seguridad
+    // Esta es la forma correcta de evitar que JwtAuthenticationFilter procese /api/usuarios POST
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(HttpMethod.POST, "/api/usuarios");
     }
 
     // Bean para el proveedor de autenticación
